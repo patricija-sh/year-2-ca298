@@ -1,0 +1,23 @@
+<%- include('header') -%>
+
+    <title>Checkout Successful</title>
+
+    <div class="container text-center border border-light rounded" style="padding:2%; margin-top: 1%;">
+        <h1 id="indiv-h1" class="d-inline">Checkout Successful!</h1>
+    </div>
+
+    <div class="container text-center bg-dark text-light rounded" style="padding:2%; margin-top: 2%; margin-bottom: 2%;">
+        <h2>Thank you for your order!</h2>
+        <br>
+        <p>You can track your parcel <a href="#" class="text-warning">here</a>.</p>
+        <img src="https://c.tenor.com/WetyFVG_rykAAAAi/%E3%81%82%E3%82%8A%E3%81%8C%E3%81%A8%E3%81%86-%E3%81%8A%E8%BE%9E%E5%84%80.gif" style="width: 15rem;">
+    </div>
+
+    <script>
+        window.onload = function()
+        {
+            isLoggedIn();  // when the page loads call isLoggedIn
+        }
+    </script>
+
+<%- include('footer') -%>

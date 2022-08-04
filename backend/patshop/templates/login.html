@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+    <form action="." method="POST">  <!-- post to whatever the current url is. -->
+        {% csrf_token %}   <!-- cross site request orderies - stops people from posting elsewhere -->
+        {{ form.as_table }}
+        <button type="submit">Submit</button>
+
+    </form>
+{% endblock %}

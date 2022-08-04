@@ -1,0 +1,17 @@
+.nav, .nav-item, .nav-link{
+    color: black;
+}
+
+.nav a:hover{                  /* Background colour of navbar headings changes to black + text turns white */
+    color: white;
+    background-color: black;
+}
+
+/* .welcome{
+    padding: 2%;
+    font-size: 150%;
+    background-color: black;
+    border-left: 100px;
+    text-align: center;
+    color: white;
+} */

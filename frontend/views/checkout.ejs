@@ -1,0 +1,145 @@
+<%- include('header') -%>
+
+<!-- html and <script> tags specific to a page go here -->
+    <title>Checkout</title>
+
+    <div class="container text-center border border-light rounded" style="padding:2%; margin-top: 1%;">
+        <h1 id="indiv-h1" class="d-inline">Checkout</h1>
+    </div>
+
+    <div id="table-div" class="container text-center" style="padding: 5%;">
+        <div class="row justify-content-center">
+            <div class="col-auto">
+                <table id="main" class="table table-hover table-dark text-center table-responsive rounded">
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="form-div" class="container bg-dark text-light border border-light rounded" style="padding: 2%; margin-bottom: 2%;">
+        <h3 id="price" class="text-center"></h3>
+        <form id="checkout-form">
+            <div class="form-group">
+                <label for="address-input">Address</label>
+                <input type="text" class="form-control" name="address-input" id="address" placeholder="Enter your address" required>
+            </div>
+            <div class=" text-center">
+                <button type="submit" id="order-btn" class="btn btn-primary bg-dark text-warning border-light d-inline">Order</button>
+                <img src="https://c.tenor.com/twJceR9ZsDEAAAAi/%E3%83%A1%E3%83%A2-%E6%9B%B8%E3%81%8F.gif" alt="" style="width: 7rem">
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let basket_id;
+        let sum = 0;
+        window.onload = function()
+        {
+            isLoggedIn();  // when the page loads call isLoggedIn
+            buildCartPage();
+        }
+
+        function buildCartPage()
+        {
+            let accessToken = localStorage.getItem("access");
+            if(accessToken == null)
+            {
+                window.location = "/login";  // redirect to login page
+            }
+            else
+            {
+                fetch("http://127.0.0.1:8000/api/basket", {
+                    'method':'GET',
+                    'headers':{
+                        "Accept": "application/json",
+                        "Content-Type": "application/json",
+                        'Authorization': 'Bearer ' + accessToken
+                    },
+                })
+                .then(resp => resp.json())
+                .then(data => {
+                    let basket = data[0];
+                    basket_id = basket['id'];
+                    let items = basket['items'];
+
+                    let htmlString = '<thead> <tr> <th scope="col">Product ID</th> <th scope="col">Image</th> <th scope="col">Name</th> <th scope="col">Price</th> <th scope="col">Quantity</th ></tr> </thead>';
+                    let table_main = document.getElementById("main");
+                    table_main.innerHTML = htmlString;
+
+                    let table_body = document.createElement("tbody");
+                    table_body.id = "table-body";
+                    table_main.appendChild(table_body);
+
+                    let i = 0;
+                    items.forEach(element => {
+                        displayCard(element, i);
+                        sum += element['price'];
+                        i += 1;
+                    })
+                    let maindiv = document.getElementById("price");
+                    let total_price = "Your total price is: €" + sum;
+                    maindiv.innerHTML += total_price;
+                })
+            }
+        }
+
+        function displayCard(product_info, i)
+        {   
+            let accessToken = localStorage.getItem("access");
+            let table_body = document.getElementById("table-body");
+            let quantity = product_info['quantity'];
+            let productid = product_info['product_id'];
+            fetch("http://127.0.0.1:8000/api/products/" + productid)
+            .then(resp => resp.json())
+            .then(data => {
+                let price = data['price'];
+                let name = data['name'];
+                let img = data['image'];
+
+                let bodyString = '<tr> <th scope="row">'+ productid +'</th> <td class="align-middle"> <img src="' + img + '" style="width:20rem"></td> <td class="align-middle">' + name +'</td> <td class="align-middle">' + price + '</td> <td class="align-middle">' + quantity + '</td></tr>';
+                let innerHTML = bodyString
+                table_body.innerHTML += bodyString;
+            });
+        }
+
+        function formValidator(event)
+        {
+            event.preventDefault(); // always prevent default events when using javascript
+            // get the value the in the username box 
+            let address = document.getElementById("address").value; 
+            if(address == "")
+            {
+                alert("Address cannot be null.");
+            }
+            else
+            {
+                fetch("http://127.0.0.1:8000/apicheckout/", {
+                    'method': 'POST',
+                    'headers': {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem("access")
+                    },
+                    'body': JSON.stringify({"basket_id": parseInt(basket_id), "shipping_addr": address})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data); // still log it so we can debug
+                    if('basket_id' in data && 'shipping_addr' in data)
+                    {
+                        window.location.href = "/checkout-success";
+                    }
+                    else
+                    {
+                        alert("Order failed.");
+                    }
+                });
+            }
+        }
+
+        let myform = document.getElementById("checkout-form"); // get the form 
+        myform.addEventListener('submit', formValidator); // bind the validator function to the submit button for the form
+    
+    </script>
+
+<%- include('footer') -%>

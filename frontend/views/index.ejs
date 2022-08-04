@@ -1,0 +1,76 @@
+
+<title>Homepage</title>    
+
+  <%- include('header') -%>
+
+  <!-- Main heading. -->
+  <div class="container text-center"> 
+    <div class="border border-light rounded" id="welcome" style="padding: 2%; margin-top: 2%;">
+      <img src="https://c.tenor.com/bsDHboz05f4AAAAi/%E3%83%9D%E3%83%B3%E3%83%9D%E3%83%B3-%E5%BF%9C%E6%8F%B4.gif" alt="" style="width: 10rem">
+      <h1 class="d-inline">The Pet Hat Shop.</h1>  <!-- <%= title %> -->
+      <h4>Your puurfect store for pet hat-related business!</h4>
+    </div>
+  </div>
+
+  <!-- 'About Us' section. -->
+  <div class="container bg-dark rounded" style="padding: 2%; margin-top: 2%;">
+    <h3 class="text-warning">About Us</h3>
+    <p class="text-light">Here at the Pet Hat Shop, we are passionate about providing your pet with the latest trend of hats!
+      <br>
+      Handmade by professionals, these accessories will surely style your fluffy (or not-so-fluffy) friend.
+      <br>
+      Browse to your heart's content!
+    </p>
+  </div>
+
+  <!-- Products list. -->
+  <div class="container" id="main-bod" style="padding: 5%;">
+	</div>
+
+  <script>
+    window.onload = function()
+    {
+      isLoggedIn();  // When the page loads, call isLoggedIn
+      buildHome();   // and build the homepage.
+    }
+
+    function buildHome()
+    {
+      fetch("http://127.0.0.1:8000/api/products")
+      .then(resp => resp.json())
+      .then(data => {
+        console.log(data);
+        
+        let i = 0;
+        let row = 0
+        data.forEach(element => {
+          if(i % 3 == 0)  // This makes 3 products line up together, and then move onto a new row.
+          {
+            row += 1;
+            let main_body = document.getElementById("main-bod")
+            let card_deck = document.createElement("div");
+            card_deck.className = "card-deck"
+            card_deck.id = "main-cont-" + row;
+            main_body.appendChild(card_deck);
+          }
+
+          console.log(element);
+          let name = element['name'];
+          let desc = element['description'];
+          let image = element['image'];
+
+          let link = document.createElement("a");
+          link.innerHTML = "View";
+          let productLink = "/productindividual?id=" + element['id'];
+
+          let htmlString = '<div class="card text-center bg-dark" style="width: 15rem; margin-bottom: 2%;">' + '<img style="object-fit: cover" class="card-img-top" src="' + image + '">' +'<div class="card-body text-light"> <h4 class="card-title">' + name + '</h4> <div class="card-footer"><a href="' + productLink + '" class="btn btn-primary bg-dark text-light border-light">View here</a></div> </div></div>'
+          let maindiv = document.getElementById("main-cont-" + row);
+          let innerHTML = maindiv.innerHTML;
+          maindiv.innerHTML = innerHTML + htmlString;
+          i += 1
+        });
+      })
+    }
+  </script>
+
+<%- include('footer') -%>

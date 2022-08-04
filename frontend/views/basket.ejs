@@ -1,0 +1,128 @@
+<%- include('header') -%>
+
+<!-- html and <script> tags specific to a page go here -->
+
+    <title>Shopping Basket</title>
+
+    <div class="container text-center" style="padding: 2%; border: 2px solid white; border-radius: 15px; margin-top: 1%;"> 
+        <h1 id="indiv-h1">Shopping Basket</h1>
+    </div>
+
+    <div class="container text-center rounded" style="padding: 5%;">
+        <div class="row justify-content-center">
+            <div class="col-auto">
+                <table id="main" class="table table-hover table-dark text-center table-responsive rounded">
+                </table>
+            </div>
+        </div>
+        <button id="checkout-btn" class="btn btn-primary bg-dark text-light border-light">Checkout</button>
+    </div>
+
+    <script>
+        window.onload = function()
+        {
+            isLoggedIn();  // when the page loads call isLoggedIn
+            buildCartPage();
+            redirectCheckout();
+        }
+
+        function buildCartPage()
+        {
+            let accessToken = localStorage.getItem("access");
+            if(accessToken == null)
+            {
+                window.location = "/login";  // redirect to login page
+            }
+            else
+            {
+                fetch("http://127.0.0.1:8000/api/basket", {
+                    'method':'GET',
+                    'headers':{
+                        "Accept": "application/json",
+                        "Content-Type": "application/json",
+                        'Authorization': 'Bearer ' + accessToken
+                    },
+                })
+                .then(resp => resp.json())
+                .then(data => {
+                    console.log(data);
+                    let basket = data[0];
+                    let items = basket['items'];
+                    if(items['length'] == 0)
+                    {
+                        let htmlString = '<div class="container text-center" style="width: 60rem; padding:5%;"><h3>Your shopping basket is empty...</h3> <img src="https://c.tenor.com/kVvaeIwJ3nAAAAAi/%E5%AF%82%E3%81%97%E3%81%84-%E6%82%B2%E3%81%97%E3%81%84.gif" alt="" style="width:30%; height:40%;"></div>';
+                        let table_main = document.getElementById("main");
+                        table_main.innerHTML = htmlString;
+                        document.getElementById("checkout-btn").remove();
+                    }
+                    else
+                    {
+                        let htmlString = '<thead> <tr> <th scope="col">Product ID</th> <th scope="col">Image</th> <th scope="col">Name</th> <th scope="col">Price</th> <th scope="col">Quantity</th ></tr> </thead>';
+                        let table_main = document.getElementById("main");
+                        table_main.innerHTML = htmlString;
+
+                        let table_body = document.createElement("tbody");
+                        table_body.id = "table-body";
+                        table_main.appendChild(table_body);
+
+                        items.forEach(element => {
+                            console.log("element: " + element);
+                            displayCard(element);
+                        })
+                    }
+                })
+            }
+        }
+
+        function displayCard(product_info)
+        {   
+            let accessToken = localStorage.getItem("access");
+            let table_body = document.getElementById("table-body");
+
+            let quantity = product_info['quantity'];
+            let price = product_info['price'];
+            let productid = product_info['product_id'];
+
+            fetch("http://127.0.0.1:8000/api/products/" + productid)
+            .then(resp => resp.json())
+            .then(data => {
+                let price1 = data['price'];
+                let name = data['name'];
+                let desc = data['description'];
+                let img = data['image'];
+
+                let bodyString = '<tr> <th scope="row">'+ productid +'</th> <td class="align-middle"> <img src="' + img + '" style="width:20rem"></td> <td class="align-middle">' + name +'</td> <td class="align-middle">' + price1 + '</td> <td class="align-middle">' + quantity + '</td> <td class="align-middle"><button class="btn btn-primary bg-dark text-light border-light" onclick="removeProduct(' + productid + ')">Remove</button></td></tr>';
+                let innerHTML = bodyString
+                table_body.innerHTML += bodyString;
+            })
+        }
+
+        function removeProduct(productid)
+        {
+                fetch("http://127.0.0.1:8000/apiremove/", {
+                    'method':'POST',
+                    'headers':{
+                        "Accept": "application/json",
+                        "Content-Type": "application/json",
+                        'Authorization': 'Bearer ' + localStorage.getItem("access")
+                    },
+
+                    'body': JSON.stringify({"product_id":parseInt(productid)})
+                })
+                .then(resp => resp.json())
+                .then(data => {
+                    window.location.reload();
+                    console.log("Item removed from basket.")
+                })
+        }
+
+        function redirectCheckout()
+        {
+            let btn = document.getElementById("checkout-btn");
+            btn.onclick = ()=> {
+                window.location = "/checkout";
+            }
+        }
+    </script>
+
+<%- include('footer') -%>

@@ -1,0 +1,85 @@
+<%- include('header') -%>
+
+<title>Register</title>
+
+    <div class="container text-center border border-light rounded" style="padding:2%; margin-top: 1%;">
+        <h1 id="indiv-h1" class="d-inline">Register</h1>
+    </div>
+
+    <div class=" d-flex container bg-dark text-light border border-light rounded text-center" style="padding: 2%; margin-top: 2%; margin-bottom: 2%;">
+        <div class="align-items-left border-right border-light" style="margin-left: 27%; padding: 2%;">
+            <form id="register-form">
+                <div  class="form-group">
+                    <label for="username-input">Username</label>
+                    <input type="text" class="form-control" name="username-input" id="username" placeholder="Your username" required>
+                </div>
+
+                <div  class="form-group">
+                    <label for="password-input">Password</label>
+                    <input type="password" class="form-control" id="password" name="password-input" placeholder="Your password" required>
+                </div>
+
+                <div  class="form-group">
+                    <label for="email-input">Email</label>
+                    <input type="email" class="form-control" id="email" name="email-input" placeholder="Your Email" required>
+                    <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                </div>
+                <button type="submit" class="btn btn-primary bg-dark text-warning border-light d-inline">Register</button>
+            </form>
+        </div>
+
+        <div class="align-items-right text-center">
+            <img src="https://c.tenor.com/QcRzIq6KTP0AAAAi/%E3%82%88%E3%81%86%E3%81%93%E3%81%9D-%E3%83%99%E3%82%BF%E3%83%83%E3%82%AF%E3%83%9E.gif" alt="" style="width: 10rem;">
+            <p style="margin-left: 30%">Welcome.</p>
+        </div>
+    </div>
+    <script>
+        window.onload = function()
+        {
+            isLoggedIn();  // when the page loads call isLoggedIn
+        }
+
+        function formValidator(event)
+        {
+            event.preventDefault(); // always prevent default events when using javascript
+            // get the value the in the username box 
+            let username = document.getElementById("username").value; 
+            // get the value in the password box
+            let password = document.getElementById("password").value;
+            let email = document.getElementById("email").value;
+            if( username == ""){
+                alert("Username cannot be null");
+            }
+            else if (password == ""){
+                alert("Password cannot be null");
+            }
+            else if (email == ""){
+                alert("Email cannot be null");
+            }
+            else{
+                fetch("http://127.0.0.1:8000/apiregister/", {
+                    method: 'POST',
+                    headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({username: username, password: password, email:email})
+                }).then(response=>response.json())
+                .then(data=>{
+                    console.log(data); // still log it so we can debug
+                    if('username' in data && 'email' in data){
+                        window.location.href = "/"; // the "/" is the homepage for node http://127.0.0.1:3000
+                    }
+                    else{
+                        alert("User already exists.");
+                    }
+                });
+            }
+        }
+
+    let myform = document.getElementById("register-form"); // get the form 
+    myform.addEventListener('submit', formValidator); // bind the validator function to the submit button for the form
+
+    </script>
+
+<%- include('footer') -%>

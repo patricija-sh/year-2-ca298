@@ -1,0 +1,86 @@
+<%- include('header') -%>
+
+<!-- html and <script> tags specific to a page go here -->
+    <title>Order History</title>
+
+    <div class="container text-center border border-light rounded" style="padding:2%; margin-top: 1%;">
+        <h1 id="indiv-h1" class="d-inline">Order History</h1>
+    </div>
+
+    <div id="table-div" class="container text-center" style="padding: 5%;">
+        <div class="row justify-content-center d-inline">
+            <div class="col-auto">
+                <table id="main" class="table table-hover table-dark text-center rounded">
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let basket;
+        let items;
+        let sum = 0;
+
+        window.onload = function()
+        {
+            isLoggedIn();  // when the page loads call isLoggedIn
+            buildCartPage();
+        }
+
+        function buildCartPage()
+        {
+            let accessToken = localStorage.getItem("access");
+            if(accessToken == null)
+            {
+                window.location = "/login";  // redirect to login page
+            }
+            else
+            {
+                let htmlString = "<thead> <tr> <th>Order ID</th> <th>Ordered on</th> <th>Shipping address</th> <th>Total</th ></tr> </thead>";
+                let table_main = document.getElementById("main");
+                table_main.innerHTML = htmlString;
+
+                let table_body = document.createElement("tbody");
+                table_body.id = "table-body";
+                table_main.appendChild(table_body);
+
+                fetch("http://127.0.0.1:8000/api/orders", {
+                    'method':'GET',
+                    'headers':{
+                        "Accept": "application/json",
+                        "Content-Type": "application/json",
+                        'Authorization': 'Bearer ' + accessToken
+                    },
+                })
+                .then(resp => resp.json())
+                .then(data => {
+                    let table_body = document.createElement("tbody");
+                    table_body.id = "table-body";
+                    table_main.appendChild(table_body);
+                    
+                    let i = 0;
+                    data.forEach(order_info => {
+                        displayCard(order_info, i)
+                        i += 1;
+                    })
+                })
+            }
+        }
+
+        function displayCard(order_info, i)
+        {   
+            let table_body = document.getElementById("table-body");
+            let datetime = order_info['datetime_ordered'];
+            let date = datetime.substring(0, datetime.indexOf("T"));
+            let time = datetime.substring(datetime.indexOf("T") + 1, datetime.indexOf("."))
+            let address = order_info['shipping_addr'];
+            let total = order_info['total_price'];
+            console.log(datetime)
+
+            let bodyString = '<tr> <th scope="row">'+ i +'</th> <td class="align-middle">'+ date + " at " + time +' </td> <td class="align-middle">' + address +'</td> <td class="align-middle">' + total + '</td> </tr>';
+            let innerHTML = bodyString
+            table_body.innerHTML += bodyString;
+        }
+    </script>
+
+<%- include('footer') -%>

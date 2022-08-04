@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %} The Pet Hat Shop {% endblock %}
+
+{% block content %}
+    <div class="welcome">
+        <p>Welcome to my humble store.</p>
+            <pre>
+                  /\___/\
+                ꒰ ˶• ༝ - ˶꒱
+                 ./づ~ ✿
+            </pre>
+    </div>
+    
+    <ul>  <!-- Showing products in an unordered list. -->
+        {% for p in products %}
+            <li>
+                <h3>{{ p.name }} - €{{ p.price }}</h3>
+                <p>{{ p.description }}</p>
+                <a href="/products/{{p.id}}">
+                    <img src="{{ p.image.url }}" width=20% height=20%/>
+                </a>
+                <br>
+                <a href="/products/{{p.id}}">View</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

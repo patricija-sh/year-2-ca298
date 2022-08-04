@@ -1,0 +1,101 @@
+
+<%- include('header') -%>
+
+    <!-- Main heading. -->
+    <title id="indiv-title"></title>
+    <div class="container text-center border border-light rounded" style="padding: 2%; margin-top: 1%;"> 
+        <h1 id="indiv-h1"></h1>
+    </div>
+
+    <!-- Individual content. -->
+    <h1 id="indiv-h1"></h1>
+    <div class="container text-center justify-content-center" style="padding: 5%;">
+        <div class="card mx-auto bg-dark text-light" style="width: 40rem;">
+            <img id="indiv-img" class="card-img-top" src="">
+            <div class="card-body">
+                <h1 id="indiv-h1" class="card-title"></h1>
+                <p id="indiv-prod"></p>
+                <h4 id="indiv-price"></h4>
+                <div id="clicky"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.onload = ()=>{
+            isLoggedIn();
+            let params = window.location.search;
+            let urlParams = new URLSearchParams(params);
+            let productID = urlParams.get("id");
+            // http://127.0.0.1:8000/api/products/id 
+            if(productID != null && typeof(productID)!= 'undefined')
+            {
+                fetch('http://127.0.0.1:8000/api/products/'+ productID)
+                .then(resp => resp.json())
+                .then(data => {
+                    console.log(data);
+                    if('detail' in data)
+                    {
+                        // display some generic product not found error
+                        document.getElementById("indiv-prod").innerHTML = "error, oop";
+
+                    }
+                    else
+                    {
+                        let name = data['name'];
+                        let desc = data['description'];
+                        let price = data['price'];
+                        let image= data['image'];
+
+                        // // display the product data
+                        document.getElementById("indiv-title").innerHTML = name;
+                        document.getElementById("indiv-h1").innerHTML = name; 
+                        document.getElementById("indiv-prod").innerHTML = desc;
+                        document.getElementById("indiv-price").innerHTML = "€" + price; 
+                        document.getElementById("indiv-img").src = image;
+
+                        let addToCart = document.createElement("button"); // create a button
+                        addToCart.innerHTML = "Add to cart"; // set the text of the button 
+                        let clicky = document.getElementById("clicky").appendChild(addToCart);
+                        clicky.className = "btn btn-secondary bg-dark text-warning"
+                        clicky.data
+
+
+                        clicky.onclick = ()=>{
+                            // code for when the button is clicked
+                            fetch('http://127.0.0.1:8000/apiadd/', {
+                                method: 'POST',
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json',
+                                    'Authorization': 'Bearer '+ localStorage.getItem("access")
+                                },
+                                body: JSON.stringify({
+                                    "product_id": parseInt(productID)
+                                })
+                            })
+                            .then(response=>response.json())
+                            .then(data=>{
+                                // display an add to cart success message
+                                if(localStorage.getItem("access") == null)
+                                {
+                                    window.location = "/login";  // they aren't signed in and can't add an item to basket.
+                                }
+                                else
+                                {
+                                    let notifyAdd = document.createElement("div"); // create a p tag
+                                    notifyAdd.innerHTML = "Added to basket!";
+                                    notifyAdd.className = "alert alert-warning";
+                                    notifyAdd.role = "alert";
+                                    document.getElementById("clicky").appendChild(notifyAdd);
+                                    console.log(data)
+                                }
+                            });
+                        }
+                    }
+                });
+            };
+        }
+    </script>
+
+<%- include('footer') -%>
